@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Streamlit
+.streamlit/
+
+# Project Specific
+outputs/
+sample_data/
+*.pdf
+*.html
+*.png
+*.jpeg
+*.jpg
+
+# OS
+.DS_Store
