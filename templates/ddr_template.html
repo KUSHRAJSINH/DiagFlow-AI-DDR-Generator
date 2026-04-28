@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Detailed Diagnostic Report (DDR)</title>
+  <style>
+    /* ─── Google Font ─────────────────────────────────────────────── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+    /* ─── Reset & Base ────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      font-size: 11pt;
+      color: #1a2332;
+      background: #ffffff;
+      line-height: 1.65;
+    }
+
+    /* ─── Cover Page ──────────────────────────────────────────────── */
+    .cover-page {
+      page-break-after: always;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f2d5e 0%, #1a4a8a 60%, #2d6cbe 100%);
+      color: #ffffff;
+      text-align: center;
+      padding: 60px 40px;
+    }
+
+    .cover-logo-bar {
+      width: 80px;
+      height: 6px;
+      background: #f0a500;
+      border-radius: 3px;
+      margin-bottom: 32px;
+    }
+
+    .cover-label {
+      font-size: 10pt;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      opacity: 0.8;
+      margin-bottom: 16px;
+    }
+
+    .cover-title {
+      font-size: 36pt;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+
+    .cover-subtitle {
+      font-size: 15pt;
+      font-weight: 300;
+      opacity: 0.85;
+      margin-bottom: 48px;
+    }
+
+    .cover-divider {
+      width: 120px;
+      height: 2px;
+      background: rgba(255,255,255,0.3);
+      margin: 0 auto 40px;
+    }
+
+    .cover-meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px 48px;
+      text-align: left;
+      margin-bottom: 48px;
+    }
+
+    .cover-meta-item label {
+      display: block;
+      font-size: 8pt;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: 0.6;
+      margin-bottom: 4px;
+    }
+
+    .cover-meta-item span {
+      font-size: 11pt;
+      font-weight: 500;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 8px 24px;
+      font-size: 9pt;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ─── Page Layout ─────────────────────────────────────────────── */
+    .page-body {
+      padding: 40px 52px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ─── Page Header/Footer ──────────────────────────────────────── */
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #0f2d5e;
+      padding-bottom: 10px;
+      margin-bottom: 32px;
+    }
+
+    .page-header .doc-title {
+      font-size: 9pt;
+      font-weight: 600;
+      color: #0f2d5e;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .page-header .doc-ref {
+      font-size: 8pt;
+      color: #999;
+    }
+
+    /* ─── Section cards ───────────────────────────────────────────── */
+    .section {
+      margin-bottom: 36px;
+      page-break-inside: avoid;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: #0f2d5e;
+      color: #ffffff;
+      font-size: 13pt;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 14pt;
+      font-weight: 700;
+      color: #0f2d5e;
+    }
+
+    .section-body {
+      background: #f7f9fc;
+      border-left: 4px solid #1a4a8a;
+      border-radius: 0 8px 8px 0;
+      padding: 18px 20px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    /* Severity-specific colors */
+    .section-severity .section-body { border-left-color: #e05c00; background: #fff8f2; }
+    .section-missing  .section-body { border-left-color: #c0392b; background: #fff5f5; }
+    .section-actions  .section-body { border-left-color: #1a7a4a; background: #f2faf6; }
+
+    /* ─── Severity pills ──────────────────────────────────────────── */
+    .severity-critical { color: #c0392b; font-weight: 700; }
+    .severity-high     { color: #e05c00; font-weight: 700; }
+    .severity-medium   { color: #b8860b; font-weight: 700; }
+    .severity-low      { color: #1a7a4a; font-weight: 700; }
+
+    /* ─── Images ──────────────────────────────────────────────────── */
+    .image-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .image-card {
+      border: 1px solid #dde3ed;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+      page-break-inside: avoid;
+    }
+
+    .image-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .image-card .image-caption {
+      padding: 8px 10px;
+      font-size: 8pt;
+      color: #555;
+      border-top: 1px solid #eee;
+      word-break: break-all;
+    }
+
+    .image-not-available {
+      padding: 20px;
+      background: #f5f5f5;
+      border: 1px dashed #ccc;
+      border-radius: 8px;
+      text-align: center;
+      color: #999;
+      font-size: 10pt;
+      margin-top: 12px;
+    }
+
+    /* ─── Conflict / Warning callout ──────────────────────────────── */
+    .conflict-note {
+      background: #fff3cd;
+      border-left: 4px solid #f0a500;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: 10pt;
+    }
+
+    /* ─── Summary Table ───────────────────────────────────────────── */
+    .summary-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 8px;
+      font-size: 10pt;
+    }
+
+    .summary-table th {
+      background: #0f2d5e;
+      color: #fff;
+      padding: 10px 14px;
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .summary-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid #e8edf4;
+    }
+
+    .summary-table tr:nth-child(even) td { background: #f7f9fc; }
+
+    /* ─── Footer ──────────────────────────────────────────────────── */
+    .footer {
+      margin-top: 48px;
+      padding-top: 16px;
+      border-top: 1px solid #dde3ed;
+      display: flex;
+      justify-content: space-between;
+      font-size: 8pt;
+      color: #aaa;
+    }
+
+    /* ─── Print / PDF ─────────────────────────────────────────────── */
+    @media print {
+      .cover-page { min-height: 100vh; }
+      .section { page-break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     COVER PAGE
+═══════════════════════════════════════════════════════════════════ -->
+<div class="cover-page">
+  <div class="cover-logo-bar"></div>
+  <div class="cover-label">Property Inspection Services</div>
+  <div class="cover-title">DDR Report</div>
+  <div class="cover-subtitle">Detailed Diagnostic Report</div>
+  <div class="cover-divider"></div>
+
+  <div class="cover-meta-grid">
+    <div class="cover-meta-item">
+      <label>Report Reference</label>
+      <span>{{ report_id }}</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>Generated On</label>
+      <span>{{ generated_date }}</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>Property / Site</label>
+      <span>{{ property_name }}</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>Prepared By</label>
+      <span>AI Diagnostics System</span>
+    </div>
+  </div>
+
+  <div class="cover-badge">Confidential — Client Report</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     MAIN BODY
+═══════════════════════════════════════════════════════════════════ -->
+<div class="page-body">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="doc-title">Detailed Diagnostic Report (DDR)</div>
+    <div class="doc-ref">Ref: {{ report_id }} &nbsp;|&nbsp; {{ generated_date }}</div>
+  </div>
+
+  <!-- ── 1. Property Issue Summary ─────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">1</div>
+      <div class="section-title">Property Issue Summary</div>
+    </div>
+    <div class="section-body">{{ sections.property_issue_summary }}</div>
+
+    {% if images.property_issue_summary %}
+    <div class="image-grid">
+      {% for img in images.property_issue_summary %}
+      <div class="image-card">
+        <img src="{{ img.path }}" alt="Property Overview" />
+        <div class="image-caption">{{ img.caption }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── 2. Area-wise Observations ─────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">2</div>
+      <div class="section-title">Area-wise Observations</div>
+    </div>
+    <div class="section-body">{{ sections.area_wise_observations }}</div>
+
+    {% if images.area_wise_observations %}
+    <div class="image-grid">
+      {% for img in images.area_wise_observations %}
+      <div class="image-card">
+        <img src="{{ img.path }}" alt="Area Observation" />
+        <div class="image-caption">{{ img.caption }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="image-not-available">📷 Image Not Available for this section</div>
+    {% endif %}
+  </div>
+
+  <!-- ── 3. Probable Root Cause ─────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">3</div>
+      <div class="section-title">Probable Root Cause</div>
+    </div>
+    <div class="section-body">{{ sections.probable_root_cause }}</div>
+
+    {% if images.probable_root_cause %}
+    <div class="image-grid">
+      {% for img in images.probable_root_cause %}
+      <div class="image-card">
+        <img src="{{ img.path }}" alt="Root Cause Evidence" />
+        <div class="image-caption">{{ img.caption }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── 4. Severity Assessment ─────────────────────────────────────── -->
+  <div class="section section-severity">
+    <div class="section-header">
+      <div class="section-number" style="background:#e05c00;">4</div>
+      <div class="section-title">Severity Assessment</div>
+    </div>
+    <div class="section-body">{{ sections.severity_assessment }}</div>
+
+    {% if images.severity_assessment %}
+    <div class="image-grid">
+      {% for img in images.severity_assessment %}
+      <div class="image-card">
+        <img src="{{ img.path }}" alt="Severity Evidence" />
+        <div class="image-caption">{{ img.caption }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── 5. Recommended Actions ─────────────────────────────────────── -->
+  <div class="section section-actions">
+    <div class="section-header">
+      <div class="section-number" style="background:#1a7a4a;">5</div>
+      <div class="section-title">Recommended Actions</div>
+    </div>
+    <div class="section-body">{{ sections.recommended_actions }}</div>
+  </div>
+
+  <!-- ── 6. Additional Notes ────────────────────────────────────────── -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-number">6</div>
+      <div class="section-title">Additional Notes</div>
+    </div>
+    <div class="section-body">{{ sections.additional_notes }}</div>
+  </div>
+
+  <!-- ── 7. Missing or Unclear Information ─────────────────────────── -->
+  <div class="section section-missing">
+    <div class="section-header">
+      <div class="section-number" style="background:#c0392b;">7</div>
+      <div class="section-title">Missing or Unclear Information</div>
+    </div>
+    <div class="section-body">{{ sections.missing_or_unclear_information }}</div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <span>This report was generated automatically by an AI diagnostics system based on provided inspection and thermal documents.</span>
+    <span>{{ report_id }}</span>
+  </div>
+
+</div>
+</body>
+</html>
